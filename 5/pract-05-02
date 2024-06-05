@@ -1,0 +1,53 @@
+import numpy as np
+
+# Функция для вычисления разделенных разностей
+def divided_differences(points):
+    n = len(points)
+    table = np.zeros((n, n))
+
+    # Заполнение начальных значений (y_i)
+    for i in range(n):
+        table[i][0] = points[i][1]
+
+    # Заполнение таблицы разделенных разностей
+    for j in range(1, n):
+        for i in range(n - j):
+            table[i][j] = (table[i + 1][j - 1] - table[i][j - 1]) / (points[i + j][0] - points[i][0])
+
+    # Возвращаем верхнюю строку таблицы, содержащую коэффициенты
+    coefficients = table[0, :n]
+    return coefficients
+
+# Функция для вычисления значения интерполяционного многочлена Ньютона в точке x
+def newton_polynomial(points, coefficients, x):
+    result = coefficients[0]
+    term = 1.0
+
+    for i in range(1, len(coefficients)):
+        term *= (x - points[i - 1][0])
+        result += coefficients[i] * term
+    return result
+
+# Заданные точки интерполяции
+points = [
+    (0.1 * np.pi, np.cos(0.1 * np.pi)),
+    (0.2 * np.pi, np.cos(0.2 * np.pi)),
+    (0.3 * np.pi, np.cos(0.3 * np.pi)),
+    (0.4 * np.pi, np.cos(0.4 * np.pi))
+]
+
+# Точка, в которой нужно вычислить значение функции
+x_star = 0.25 * np.pi
+
+# Вычисление коэффициентов многочлена Ньютона
+coefficients = divided_differences(points)
+
+# Вычисление значения функции в точке x_star
+interpolated_value = newton_polynomial(points, coefficients, x_star)
+exact_value = np.cos(x_star)
+error = abs(interpolated_value - exact_value)
+
+# Вывод результатов
+print(f"Interpolated value at x = {x_star} is {interpolated_value}")
+print(f"Exact value at x = {x_star} is {exact_value}")
+print(f"Error is {error}")
